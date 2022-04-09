@@ -1,0 +1,183 @@
+service: messageboard
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+  profile: serverless
+  environment: ${self:custom.settings}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:*
+          Resource: '*'
+        - Effect: 'Allow'
+          Action:
+            - 'sqs:SendMessage'
+          Resource: 'arn:aws:sqs:${self:provider.region}:*:BoardQueue'
+        - Effect: 'Allow'
+          Action:
+            - sns:*
+          Resource: 'arn:aws:sns:${self:provider.region}:*:UserTopic'
+        - Effect: 'Allow'
+          Action:
+            - sns:*
+          Resource: 'arn:aws:sns:${self:provider.region}:*:MessageTopic'
+
+plugins:
+  - serverless-webpack
+
+package:
+  individually: true
+
+custom:
+  settings:
+    ACCOUNT_ID: XXXXXXXXXXX
+    usersTableName: users
+    boardsTableName: boards
+    messagesTableName: messages
+
+functions:
+  getUser:
+    handler: lambdas/endpoints/users/getUser.handler
+    events:
+      - httpApi:
+          path: /users/{ID}
+          method: get
+  getUserByEmail:
+    handler: lambdas/endpoints/users/getUserByEmail.handler
+    events:
+      - httpApi:
+          path: /user-by-email/{email}
+          method: get
+  createUser:
+    handler: lambdas/endpoints/users/createUser.handler
+    environment:
+      userTopicARN:
+        Ref: SNSTopicUserTopic
+    events:
+      - httpApi:
+          path: /users
+          method: post
+  postMessage:
+    handler: lambdas/endpoints/messages/postMessage.handler
+    environment:
+      messageTopicARN:
+        Ref: SNSTopicMessageTopic
+    events:
+      - httpApi:
+          path: /messages
+          method: post
+  createBoard:
+    handler: lambdas/endpoints/boards/createBoard.handler
+    events:
+      - httpApi:
+          path: /boards
+          method: post
+  getBoards:
+    handler: lambdas/endpoints/boards/getBoards.handler
+    events:
+      - httpApi:
+          path: /boards
+          method: get
+  snsCreateUser:
+    handler: lambdas/sns/createUser.handler
+    events:
+      - sns:
+          topicName: UserTopic
+  snsPostMessage:
+    handler: lambdas/sns/postMessage.handler
+    events:
+      - sns:
+          topicName: MessageTopic
+
+  sqsCreateBoard:
+    handler: lambdas/sqs/createBoard.handler
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - BoardQueue
+              - Arn
+          batchSize: 1
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.settings.usersTableName}
+        AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+        GlobalSecondaryIndexes:
+          - IndexName: email-index
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+    BoardsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.settings.boardsTableName}
+        AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: S
+          - AttributeName: name
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+        GlobalSecondaryIndexes:
+          - IndexName: name-index
+            KeySchema:
+              - AttributeName: name
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+    MessagesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.settings.messagesTableName}
+        AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: S
+          - AttributeName: board
+            AttributeType: S
+          - AttributeName: user
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+        GlobalSecondaryIndexes:
+          - IndexName: board-index
+            KeySchema:
+              - AttributeName: board
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: user-index
+            KeySchema:
+              - AttributeName: user
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+    BoardQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: BoardQueue

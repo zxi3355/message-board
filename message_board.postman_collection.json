@@ -1,0 +1,162 @@
+{
+	"info": {
+		"_postman_id": "6310457a-2e85-4d09-a70b-c560123e563d",
+		"name": "message_board",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "create user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"test username\",\n    \"email\": \"test2@test.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://vjcm5ubv0d.execute-api.us-east-1.amazonaws.com/users",
+							"protocol": "https",
+							"host": [
+								"vjcm5ubv0d",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://vjcm5ubv0d.execute-api.us-east-1.amazonaws.com/user-by-email/test@test.com",
+							"protocol": "https",
+							"host": [
+								"vjcm5ubv0d",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"user-by-email",
+								"test@test.com"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "messages",
+			"item": [
+				{
+					"name": "post message",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"message\": \"TEST MESSAGE\",\n    \"board\": \"dbd0e187-4874-444a-abe8-b4f96c3db93c\",\n    \"user\": \"5d438862-73dd-4995-993b-0ca4a78ecc5e\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://vjcm5ubv0d.execute-api.us-east-1.amazonaws.com/messages",
+							"protocol": "https",
+							"host": [
+								"vjcm5ubv0d",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"messages"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "boards",
+			"item": [
+				{
+					"name": "create board",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"My Second Board\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://vjcm5ubv0d.execute-api.us-east-1.amazonaws.com/boards",
+							"protocol": "https",
+							"host": [
+								"vjcm5ubv0d",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"boards"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get boards",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://vjcm5ubv0d.execute-api.us-east-1.amazonaws.com/boards",
+							"protocol": "https",
+							"host": [
+								"vjcm5ubv0d",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"boards"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
